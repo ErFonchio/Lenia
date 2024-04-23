@@ -25,16 +25,26 @@ class Main():
         self.channel = Channel(WIDTH, HEIGHT, self.tk)
 
     def world(self):
-        table_prova = np.random.rand(100, 100)*255  
+        '''eventi aciclici (preprocessing)'''
+        #creazione kernel convoluzione
         self.channel.kernel()
-        self.gui.print_table(self.channel.kernel_*255)
-        #self.manager_loop(table_prova)
+        self.gui.print_table(self.channel.kernel_)
+
+        #creazione funzione di crescita
+        self.channel.growth()
+        
+        
+        '''loop manager per gli eventi ciclici'''
+        #self.manager_loop(self.channel.kernel_)
+        
+        
+        '''mainloop tkinter'''
         self.gui.root.mainloop()
 
     def manager_loop(self, table_prova):
         
-        self.gui.mainloop_gui(table_prova)
-        self.gui.root.after(TIME, self.manager_loop)
+        #self.gui.mainloop_gui(table_prova)
+        self.gui.root.after(TIME, self.manager_loop, table_prova)
 
 
 class Gui:
@@ -61,34 +71,32 @@ class Gui:
     def mainloop_gui(self, table):
         self.print_table(table)
         
-    def print_table(self, table):
-        table = self.matrix_scaling(table, 5)
-        table = self.color_mapping(table)
-        self.img =  ImageTk.PhotoImage(image=Image.fromarray(table).convert('RGB'))
-        self.canvas.create_image(10, 10, anchor="nw", image=self.img)
+    def print_table(self, raw_table, padx=10, pady=10):
+        table, somma = raw_table
+        table = self.matrix_scaling(table, 20)
+        table = self.color_mapping(table, somma)
+        self.img =  ImageTk.PhotoImage(image=Image.fromarray(table))
+        self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
     
-    def color_mapping(self, table):
-        # Normalize the table values to the range [0, 1]
-        normalized_table = table / 255.0
-        
-        # Create a custom colormap using violet colors
-        #colors = [(1, 1, 1), (0.5, 0, 1)]  # From white to violet RGB
-        #colors = [(0, 0, 1), (0.5, 0, 1)]  #violet-blue
-        #colors = [(1, 0, 0), (0.5, 0, 1)]
-        colors = [(1, 1, 1), (0, 0, 0)] #grigi
-        cmap = mcolors.LinearSegmentedColormap.from_list("my_colormap", colors)
-        
-        # Apply the colormap to the normalized table
-        colored_table = cmap(normalized_table)
-        
-        # Convert to RGB values in the range [0, 255]
+    def color_mapping(self, table, somma):
+        #Inverto il processo di normalizzazione rimoltiplicando per la somma dei valori del kernel
+        table *= somma
+        colored_table = plt.cm.plasma(table)
         colored_table = (colored_table[:, :, :3] * 255).astype(np.uint8)
-        
         return colored_table
 
-    def matrix_scaling(self, matrix, alfa):
-        matrice_espansa = np.repeat(np.repeat(matrix, alfa, axis=0), alfa, axis=1)
+    def matrix_scaling(self, matrix, alpha):
+        m = np.asarray(matrix)
+        matrice_espansa = np.zeros((m.shape[0]*alpha, m.shape[1]*alpha))
+        #print(matrice_espansa)
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                for k in range(alpha):
+                    for g in range(alpha):
+                        matrice_espansa[(i*alpha)+k][(j*alpha)+g] = m[i][j]
+
         return matrice_espansa
+
     
 class Channel:
     def __init__(self, WIDTH, HEIGHT, tk): 
@@ -106,25 +114,58 @@ class Channel:
     def update_channel(self): ...
 
     def kernel(self, k=None, a=None, b=None, w=None, r=None):
+        #Viene invocata la classe kernel che si occupa di modellare i kernel
+        #m=media, s=varianza, len=diametro gaussian-bell
+        k = Kernel()
+        #self.kernel_ = k.create_2dBell(m=0.5, s=0.15, len=21)
+        self.kernel_ = k.create_2dgaussian_classic(m=0.5, s=0.15, len=21)
 
-        sigma = 10
-        self.kernel_shape[0] = 6*sigma+1
-        self.kernel_shape[1] = 6*sigma+1
-        self.kernel_ = np.empty(self.kernel_shape)
-        radius = 3*sigma
+    def growth(self, m_, s_, U_):
+        bell = lambda x, m, s: np.exp(-((x-m)/s)**2 / 2)
+        return bell(U_, m_, s_)*2-1
 
-        for x in range(-radius, radius+1):
-            for y in range(-radius, radius+1): 
-                self.kernel_[x][y] = (1/(2*math.pi*pow(sigma, 2)))*math.exp(-(pow(x, 2)+pow(y, 2))/(2*pow(sigma, 2)))
-        #self.kernel_ = self.kernel_/np.sum(self.kernel_)
-        self.kernel_ *= 255
-        print(self.kernel_)
-
-    def growth(self): ...
 
 class Kernel:
-    def __init__(self, k, a, b, w, r):
-        ...
+    def __init__(self):
+        self.sigma = None
+        self.m = None
+        self.len = None
+        self.kernel = None
+    
+    #Funziona
+    def create_2dgaussian_classic(self, m, s, len):
+        radius = len//2
+        K = np.zeros((len, len))
+        for x in range(-radius, radius+1):
+            for y in range(-radius, radius+1):
+                distance = math.sqrt(x**2+y**2)
+                n_distance = distance / radius
+                K[x+radius][y+radius] = np.exp(-((n_distance-m)/s)**2 / 2);  
+        
+        somma = np.sum(K)
+        K /= somma
+        return K, somma
+    
+    #Ritorna il kernel e la somma per la normalizzazione per rinvertire e stampare
+    def create_2dBell(self, m, s, len) -> tuple:
+        if len==None:
+            len = 6*s+1
+        R = len//2
+        bell = lambda x, m, s: np.exp(-((x-m)/s)**2 / 2)
+        x, y = np.ogrid[-R:R, -R:R]
+        D = np.sqrt(x**2 + y**2)
+        D = D / R
+        K = bell(D, m, s)
+        print(K)
+        somma = np.sum(K)
+        self.kernel = K / somma
+        return self.kernel, somma
+    
+    def create_2dRingLikeKernel(self):
+        K = np.asarray([[0.5, 0.3, 0.1], [0, 1, 0], [0, 0, 0], [0, 1, 0]])
+        return K
+
+    
 
 
 m = Main()
