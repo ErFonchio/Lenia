@@ -17,25 +17,23 @@ class Gui:
         self.FPS = FPS
 
         self.root.maxsize(self.width, self.height)
-        mainframe = Frame(self.root, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
-        mainframe.grid(row=0, column=0, padx=10, pady=10)
-        secondframe = Frame(self.root, width=self.SECONDFRAME_W, height=self.SECONDFRAME_H, bg="white")
-        secondframe.grid(row=0, column=1, padx=10, pady=10)
+        self.mainframe = Frame(self.root, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
+        self.mainframe.grid(row=0, column=0, padx=10, pady=10)
+        
+        self.secondframe = Frame(self.root, width=self.SECONDFRAME_W, height=self.SECONDFRAME_H, bg="white")
+        self.secondframe.grid(row=0, column=1, padx=10, pady=10)
+        #self.initialize_secondwindow()
+        
         self.img = None
-        self.canvas = Canvas(mainframe, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
+        self.canvas = Canvas(self.mainframe, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
         self.canvas.pack()
 
     def mainloop_gui(self, table):
         self.print_table(table, fit=False)
         
     def print_table(self, table, padx=10, pady=10, fit=False):
-        scale_size_width = 5
-        scale_size_height = 5
-        if fit:
-            scale_size_width = int((self.MAINFRAME_W)//len(table))
-            scale_size_height = int((self.MAINFRAME_H)//len(table[0]))
-
-        scaled_table = self.matrix_scaling(table, alpha_w=scale_size_width, alpha_h=scale_size_height)
+        zoom = 5
+        scaled_table = np.kron(table, np.ones((zoom, zoom)))
         table = self.color_mapping(scaled_table)
         self.img =  ImageTk.PhotoImage(image=Image.fromarray(table))
         self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
@@ -63,3 +61,20 @@ class Gui:
 
         return matrice_espansa
 
+    def initialize_secondwindow(self):
+        
+        self.initialize_speciesmenu()
+
+    def initialize_speciesmenu(self):
+        menubar = Menu(self.secondframe)
+        filemenu = Menu(menubar, tearoff=0)
+        filemenu.add_command(label="New")
+        filemenu.add_command(label="Open")
+        filemenu.add_command(label="Save")
+        filemenu.add_command(label="Save as...")
+        filemenu.add_command(label="Close")
+
+        # Aggiungi il menu filemenu alla barra dei menu
+        menubar.add_cascade(label="File", menu=filemenu)
+
+        self.secondframe.config(menu=menubar)

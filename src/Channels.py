@@ -20,10 +20,11 @@ class Channel:
         self.delta = 10 #l'inversa determina l'incremento temporale
 
 
-    def initialize_table(self, mode=None):
+    def initialize_table(self, mode=None, rows=64, cols=64):
         
-        rows = 64
-        cols = 64
+        if rows or cols:
+            rows = rows
+            cols = cols
 
         w_radius = rows//10
         h_radius = cols//10
@@ -59,8 +60,12 @@ class Channel:
             
             table[start_row:start_row+cells.shape[0], start_col:start_col+cells.shape[1]] = cells
         else:
-            table[start_row:end_row, start_col:end_col] = np.random.rand(end_row-start_row, end_col-start_col)
-        
+            radius = 15
+            #table[start_row:end_row, start_col:end_col] = np.random.rand(end_row-start_row, end_col-start_col)
+            table[start_row-radius:end_row+radius, start_col-radius:end_col+radius] = np.random.rand(end_row-start_row+radius*2, end_col-start_col+radius*2)
+            #table[start_row-100:end_row+100, start_col-100:end_col+100] = np.random.rand(end_row-start_row, end_col-start_col)
+
+
         self.table = table
 
     def update_channel(self): 

@@ -1,10 +1,14 @@
 from tkinter import *
 from Gui import Gui
 from Channels import Channel
+from Statistics import Statistics
+import time
+import cProfile
+import pstats
 
 WIDTH = 1000
 HEIGHT = 600
-FPS = 120
+FPS = 20
 TIME = int(1000/FPS)
 
 
@@ -18,20 +22,33 @@ class Main():
         self.gui = Gui(WIDTH, HEIGHT, FPS, self.tk)
         self.channel = Channel(WIDTH, HEIGHT, self.tk)
 
+        self.start = 0
+        self.end = 0
+
     def world(self):
+
         '''eventi aciclici (preprocessing)'''
+        #stats
+        s = Statistics()
+
         #kernel initialization
-        self.channel.make_kernel_function(m=0.5, s=0.15, kernel_len=27, table_len=64)
+        len = 90
+        self.channel.make_kernel_function(m=0.5, s=0.15, kernel_len=27, table_len=len)
         #table inizialitazion
-        self.channel.initialize_table(mode="orbium")
+        self.channel.initialize_table(mode="orbium", rows=len, cols=len)
 
         '''loop manager per gli eventi ciclici'''
         self.manager_loop()
         
         '''mainloop tkinter'''
         self.gui.root.mainloop() 
+        
 
     def manager_loop(self):
+        '''test fps'''
+        #self.end = time.time()
+        #print("Fps: ", 1/(self.end-self.start))
+        #self.start = time.time()
 
         '''Il manager aggiorna la griglia e poi avvia la stampa tramite la GUI'''
         self.channel.update_channel()
@@ -43,6 +60,17 @@ class Main():
         self.gui.root.after(TIME, self.manager_loop)
 
 
-        
-m = Main()
-m.world()
+if __name__ == "__main__":
+
+    '''test per profiling'''
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
+    m = Main()
+    m.world()
+
+    '''test profiling'''
+    profiler.disable()
+    stats = pstats.Stats(profiler).sort_stats('cumtime')
+    stats.print_stats()
+    stats.dump_stats('profile_results.prof')
