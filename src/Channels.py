@@ -65,7 +65,6 @@ class Channel:
             table[start_row-radius:end_row+radius, start_col-radius:end_col+radius] = np.random.rand(end_row-start_row+radius*2, end_col-start_col+radius*2)
             #table[start_row-100:end_row+100, start_col-100:end_col+100] = np.random.rand(end_row-start_row, end_col-start_col)
 
-
         self.table = table
 
     def update_channel(self): 

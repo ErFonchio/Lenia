@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
+SECONDWINDOW_BG = "white"
+
 
 class Gui:
     def __init__(self, WIDTH, HEIGHT, FPS, window):
@@ -16,14 +18,19 @@ class Gui:
         self.SECONDFRAME_W = (WIDTH*0.3)-20
         self.SECONDFRAME_H = HEIGHT
         self.FPS = FPS
+        self.playFlag = 1 #flag for play and stop button
 
+        '''initializing mainframe and secondframe'''
         self.root.maxsize(self.width, self.height)
         self.mainframe = Frame(self.root, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
-        self.mainframe.grid(row=0, column=0, padx=10, pady=10)
+        self.mainframe.grid(row=0, column=0, padx=0, pady=0)
+        self.labelFps = Label(self.mainframe, text="FPS: "+str(self.FPS), font=("Helvetica", 16))
+        self.labelFps.pack()
+        self.secondframe = Frame(self.root, width=self.SECONDFRAME_W, height=self.SECONDFRAME_H, bg=SECONDWINDOW_BG)
+        self.secondframe.grid_propagate(False)
+        self.secondframe.grid(row=0, column=1, padx=0, pady=0)
         
-        self.secondframe = Frame(self.root, width=self.SECONDFRAME_W, height=self.SECONDFRAME_H, bg="white")
-        self.secondframe.grid(row=0, column=1, padx=10, pady=10)
-        #self.initialize_secondwindow()
+        self.initialize_secondwindow()
         
         self.img = None
         self.canvas = Canvas(self.mainframe, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
@@ -68,18 +75,36 @@ class Gui:
 
     def initialize_secondwindow(self):
         
-        self.initialize_speciesmenu()
+        self.initialize_buttons()
 
-    def initialize_speciesmenu(self):
-        menubar = Menu(self.secondframe)
-        filemenu = Menu(menubar, tearoff=0)
-        filemenu.add_command(label="New")
-        filemenu.add_command(label="Open")
-        filemenu.add_command(label="Save")
-        filemenu.add_command(label="Save as...")
-        filemenu.add_command(label="Close")
+    def initialize_buttons(self):
 
-        # Aggiungi il menu filemenu alla barra dei menu
-        menubar.add_cascade(label="File", menu=filemenu)
+        self.buttonList = []
+        
+        self.playButton = Button(self.secondframe, text="Play", command=self.play, highlightbackground=SECONDWINDOW_BG)
+        self.playButton.grid(row=0, column=0)
+        self.stopButton = Button(self.secondframe, text="Stop", command=self.stop, highlightbackground=SECONDWINDOW_BG)
+        self.stopButton.grid(row=0, column=1)
+        self.resetButton = Button(self.secondframe, text="Reset", command=self.reset, highlightbackground=SECONDWINDOW_BG)
+        self.resetButton.grid(row=0, column=2)
 
-        self.secondframe.config(menu=menubar)
+        self.buttonList.append(self.playButton)
+        self.buttonList.append(self.stopButton)
+        self.buttonList.append(self.resetButton)
+
+    
+    def play(self):
+        self.playFlag = 1
+        print("Hai premuto play")
+
+    def stop(self):
+        self.playFlag = 0
+        print("Hai premuto stop")
+
+    def reset(self):
+        self.playFlag = 2
+        print("Hai premuto reset")
+
+    def updateFps(self, realTimeFPS):
+        self.labelFps.config(text="FPS: "+str(realTimeFPS)[:4])
+

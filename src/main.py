@@ -21,15 +21,13 @@ class Main():
         self.table = None
         self.gui = Gui(WIDTH, HEIGHT, FPS, self.tk)
         self.channel = Channel(WIDTH, HEIGHT, self.tk)
+        self.stats = Statistics()
 
         self.start = 0
         self.end = 0
 
     def world(self):
-
-        '''eventi aciclici (preprocessing)'''
-        #stats
-        s = Statistics()
+        '''preprocessing'''
 
         #kernel initialization
         len = 90
@@ -45,17 +43,27 @@ class Main():
         
 
     def manager_loop(self):
-        '''test fps'''
-        # self.end = time.time()
-        # print("Fps: ", 1/(self.end-self.start))
-        # self.start = time.time()
+        if self.gui.playFlag == 1:
+            
+            '''fps update'''
+            self.end = time.time()
+            self.gui.updateFps(1/(self.end-self.start))
+            self.start = time.time()
 
-        '''Il manager aggiorna la griglia e poi avvia la stampa tramite la GUI'''
-        self.channel.update_channel()
+            '''stats update'''
+            self.stats.updateStats(self.channel.table)
+
+            '''Il manager aggiorna la griglia e poi avvia la stampa tramite la GUI'''
+            self.channel.update_channel()
         
-        '''il manager avvia il loop della gui'''
-        self.gui.mainloop_gui(self.channel.table) #La gui non ha i permessi di modifica sui channel
-
+            '''il manager avvia il loop della gui'''
+            self.gui.mainloop_gui(self.channel.table) #La gui non ha i permessi di modifica sui channel
+        
+        elif self.gui.playFlag == 2:
+            len = 90
+            self.channel.initialize_table(mode="orbium", rows=len, cols=len)
+            self.gui.playFlag = 1
+        
         '''viene richiamata la funzione manager_loop dopo [TIME] tempo'''
         self.gui.root.after(TIME, self.manager_loop)
 
