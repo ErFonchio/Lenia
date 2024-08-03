@@ -2,6 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2
 
 
 class Gui:
@@ -45,8 +46,12 @@ class Gui:
         self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
     
     def color_mapping(self, table):
-        colored_table = plt.cm.plasma(table)
-        colored_table = (colored_table[:, :, :3] * 255).astype(np.uint8)
+        # Normalizza la tabella dei valori tra 0 e 255
+        norm_table = (table*255).astype(np.uint8)
+        
+        # Applica la mappa dei colori plasma
+        colored_table = cv2.applyColorMap(norm_table, cv2.COLORMAP_INFERNO)
+
         return colored_table
 
     def matrix_scaling(self, matrix, alpha_w, alpha_h):

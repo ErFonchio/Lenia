@@ -8,7 +8,7 @@ import pstats
 
 WIDTH = 1000
 HEIGHT = 600
-FPS = 20
+FPS = 30
 TIME = int(1000/FPS)
 
 
@@ -46,15 +46,15 @@ class Main():
 
     def manager_loop(self):
         '''test fps'''
-        #self.end = time.time()
-        #print("Fps: ", 1/(self.end-self.start))
-        #self.start = time.time()
+        # self.end = time.time()
+        # print("Fps: ", 1/(self.end-self.start))
+        # self.start = time.time()
 
         '''Il manager aggiorna la griglia e poi avvia la stampa tramite la GUI'''
         self.channel.update_channel()
         
         '''il manager avvia il loop della gui'''
-        self.gui.mainloop_gui(self.channel.table) #La gui non ordina/manipola i channel, gli viene dato tutto dal manager
+        self.gui.mainloop_gui(self.channel.table) #La gui non ha i permessi di modifica sui channel
 
         '''viene richiamata la funzione manager_loop dopo [TIME] tempo'''
         self.gui.root.after(TIME, self.manager_loop)

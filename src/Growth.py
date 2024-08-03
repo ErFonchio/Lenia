@@ -1,5 +1,3 @@
-import random
-import math
 import numpy as np
 
 bell = lambda x, m, s: np.exp(-((x-m)/s)**2 / 2)
