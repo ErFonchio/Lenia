@@ -52,6 +52,9 @@ class Main():
 
             '''stats update'''
             self.stats.updateStats(self.channel.table)
+            self.gui.updateGuiStats(mass=self.stats.tableMass, COM=self.stats.COM, 
+                                    vel=self.stats.vel, linVel=self.stats.LinVel, 
+                                    angle=self.stats.ang, angularVel=self.stats.angularVel)
 
             '''Il manager aggiorna la griglia e poi avvia la stampa tramite la GUI'''
             self.channel.update_channel()
