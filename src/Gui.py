@@ -38,15 +38,9 @@ class Gui:
         self.canvas = Canvas(self.mainframe, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
         self.canvas.pack()
 
-    def mainloop_gui(self, table):
-        self.print_table(table, fit=False)
+    def mainloop_gui(self, tableList):
+        self.printTable(tableList, fit=False)
         
-    def print_table(self, table, padx=10, pady=10, fit=False):
-        zoom = 5
-        scaled_table = np.kron(table, np.ones((zoom, zoom)))
-        table = self.color_mapping(scaled_table)
-        self.img =  ImageTk.PhotoImage(image=Image.fromarray(table))
-        self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
 
     def print_kernel(self, kernel, padx=10, pady=10):
         kernel = self.matrix_scaling(kernel, 30, 30)
@@ -54,26 +48,22 @@ class Gui:
         self.img =  ImageTk.PhotoImage(image=Image.fromarray(kernel))
         self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
     
-    def color_mapping(self, table):
-        # Normalizza la tabella dei valori tra 0 e 255
-        norm_table = (table*255).astype(np.uint8)
-        
-        # Applica la mappa dei colori plasma
-        colored_table = cv2.applyColorMap(norm_table, cv2.COLORMAP_INFERNO)
+    def printTable(self, tableList, padx=10, pady=10, fit=False):
+        zoom = 3
+        scaledTables = []
+        #print(tableList)
+        for i in range(len(tableList)):
+            table = np.kron(tableList[i], np.ones((zoom, zoom)))
+            scaledTables.append(table)
+        print(scaledTables)
+        t = self.color_mapping(scaledTables)
+        t = np.clip(t, 0, 255).astype(np.uint8)
+        self.img =  ImageTk.PhotoImage(image=Image.fromarray(t))
+        self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
+    
+    def color_mapping(self, scaledTables):
+        return np.stack((scaledTables[0], scaledTables[1], scaledTables[2]), axis=-1)
 
-        return colored_table
-
-    def matrix_scaling(self, matrix, alpha_w, alpha_h):
-        m = matrix
-
-        matrice_espansa = np.zeros((m.shape[0]*alpha_w, m.shape[1]*alpha_h))
-        for i in range(matrix.shape[0]):
-            for j in range(matrix.shape[1]):
-                for k in range(alpha_w):
-                    for g in range(alpha_h):
-                        matrice_espansa[(i*alpha_w)+k][(j*alpha_h)+g] = m[i][j]
-
-        return matrice_espansa
 
     def initialize_secondwindow(self):
         

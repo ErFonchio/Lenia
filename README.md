@@ -19,6 +19,6 @@ Hi, this is my thesi's project on Lenia.
 
 ## Aquarium
 
-- [ ] Undrstand how to create kernels -> b value !!
+- [ ] Undrstand how to create kernels -> b value !! mezzo capito
 - [ ] Set up cycle on every kernel
 - [ ] Represent channels as RGB values
