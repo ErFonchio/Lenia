@@ -49,21 +49,20 @@ class Gui:
         self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
     
     def printTable(self, tableList, padx=10, pady=10, fit=False):
-        zoom = 3
+        zoom = 5
         scaledTables = []
-        #print(tableList)
         for i in range(len(tableList)):
             table = np.kron(tableList[i], np.ones((zoom, zoom)))
             scaledTables.append(table)
-        print(scaledTables)
-        t = self.color_mapping(scaledTables)
-        t = np.clip(t, 0, 255).astype(np.uint8)
+
+        t = 0.299*scaledTables[0]+0.587*scaledTables[1]+0.114*scaledTables[2]
+        t = np.clip(t, 0, 255)
+        
         self.img =  ImageTk.PhotoImage(image=Image.fromarray(t))
         self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
     
     def color_mapping(self, scaledTables):
-        return np.stack((scaledTables[0], scaledTables[1], scaledTables[2]), axis=-1)
-
+        return np.stack((scaledTables[0], scaledTables[1], scaledTables[2]), axis=0)
 
     def initialize_secondwindow(self):
         

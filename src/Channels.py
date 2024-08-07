@@ -17,14 +17,17 @@ class Channel:
         self.delta = T #l'inversa determina l'incremento temporale
 
 
-    def initialize_table(self, mode, rows, cols, table):
-        # if table != None:
-        #     self.table = [[random.randint(0,1) for i in range (rows)] for j in range(cols)]
-        # else:
-        #     self.table = table
-        self.table = np.ones((rows, cols))
-        
-    
+    def initialize_table(self, rows, cols, table):
+        if table == None:
+            self.table = [[random.randint(0,1) for i in range (rows)] for j in range(cols)]
+        else:
+            self.table = np.zeros((rows, cols))
+            tableRow, tableCol = np.shape(table)
+            start_row = (rows - tableRow) // 2
+            start_col = (cols - tableCol) // 2
+
+            self.table[start_row:start_row + tableRow, start_col:start_col + tableCol] = table
+
 
     def convolveAndGrowChannel(self, growthFunction, kernel, m, s):
         '''FFT'''
