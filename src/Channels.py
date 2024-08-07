@@ -5,12 +5,8 @@ from Growth import Growth
 import random
 
 class Channel:
-    def __init__(self, WIDTH, HEIGHT, tk, T): 
+    def __init__(self, tk, T): 
         self.flag_update = True
-        self.WIDTH = WIDTH
-        self.height = HEIGHT
-        self.table_width = 50
-        self.table_height = 50
         self.tk = tk
         self.table = None
         self.states = 1
@@ -33,7 +29,9 @@ class Channel:
         '''FFT'''
         transformed_kernel = np.fft.fft2(np.fft.fftshift(kernel))
         U = np.real(np.fft.ifft2(transformed_kernel * np.fft.fft2(self.table)))
-        G = (1/self.delta)*growthFunction(m=m, s=s, U=U)
+        G = (1/self.delta) * growthFunction(m=m, s=s, U=U)
+        #print(growthFunction(m=m, s=s, U=U))
+        
         return G
 
     def updateChannel(self, G, weight): 

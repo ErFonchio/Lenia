@@ -11,7 +11,7 @@ import numpy as np
 
 WIDTH = 1000
 HEIGHT = 600
-FPS = 0.1
+FPS = 30
 TIME = int(1000/FPS)
 
 
@@ -28,7 +28,7 @@ class Main():
         self.stats = Statistics()
         self.start = 0
         self.end = 0
-        self.tabLen = 64
+        self.tabLen = 128
 
     def world(self):
         np.set_printoptions(threshold=np.inf)
@@ -62,26 +62,23 @@ class Main():
 
         '''kernel list'''
         self.kernelSpecs = pattern['kernels']
-        # f = open("kernels.txt", "w")
+        
         for spec in self.kernelSpecs:
-            kernel = Kernel(spec['h'], spec['c0'], spec['c1'], spec['m'], spec['s'])
-            kernel.create_2dgaussian_classic_fft(radius, spec['r'], spec['b'], (2*radius)+1, self.tabLen)
+            kernel = Kernel(weight=spec['h'], c0=spec['c0'], c1=spec['c1'], m=spec['m'], s=spec['s'])
+            kernel.create_2dgaussian_classic_fft(R=radius, r=spec['r'], B=spec['b'], table_len=self.tabLen)
             self.kernelList.append(kernel)
-        #     np.savetxt(f, kernel.kernel)
-        #     f.write('\n')
-        # f.close()
 
         '''Channels RGB'''
         self.channels = [
-            Channel(WIDTH, HEIGHT, self.tk, delta),
-            Channel(WIDTH, HEIGHT, self.tk, delta),
-            Channel(WIDTH, HEIGHT, self.tk, delta)]
+            Channel(self.tk, delta),
+            Channel(self.tk, delta),
+            Channel(self.tk, delta)]
         
         self.channels[0].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][0])
         self.channels[1].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][1])
         self.channels[2].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][2])
 
-        '''loop manager for computation and renderization'''
+        '''loop manager for computation and rendering'''
         self.manager_loop()
         
         '''mainloop for tkinter engine'''
@@ -102,24 +99,19 @@ class Main():
             #                        angle=self.stats.ang, angularVel=self.stats.angularVel)
 
             '''Il manager aggiorna la griglia e poi avvia la stampa tramite la GUI'''
-            '''for kernel in listakernel inizializzata:'''
             for i in range(len(self.kernelList)):
-                #calculate convolution between K and channel i
-                #apply growth mapping to the wheighted sums
-                #add small portion dt * hk/H of the result to channel j.
                 src = self.kernelList[i].channelSrc #src index
                 dst = self.kernelList[i].channelDst #dst index
                 G = self.channels[src].convolveAndGrowChannel(kernel=self.kernelList[i].kernel, growthFunction=self.g.make_bell, m=self.kernelList[i].m, s=self.kernelList[i].s)
                 self.channels[dst].updateChannel(G, self.kernelList[i].weight)
-            
-        
+
             '''il manager avvia il loop della gui'''
             self.gui.mainloop_gui([self.channels[0].table, self.channels[1].table, self.channels[2].table]) #La gui non ha i permessi di modifica sui channel
         
         elif self.gui.playFlag == 2:
-            self.channels[0].initialize_table(mode="aquarium", rows=self.tabLen, cols=self.tabLen)
-            self.channels[1].initialize_table(mode="aquarium", rows=self.tabLen, cols=self.tabLen)
-            self.channels[2].initialize_table(mode="aquarium", rows=self.tabLen, cols=self.tabLen)
+            self.channels[0].initialize_table(rows=self.tabLen, cols=self.tabLen)
+            self.channels[1].initialize_table(rows=self.tabLen, cols=self.tabLen)
+            self.channels[2].initialize_table(rows=self.tabLen, cols=self.tabLen)
             self.gui.playFlag = 1
         
         '''viene richiamata la funzione manager_loop dopo [TIME] tempo'''
