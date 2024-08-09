@@ -22,16 +22,16 @@ class Statistics:
         
 
     def mass(self, table):
-        self.tableMass = table.sum()
+        self.tableMass = table[0].sum()+table[1].sum()+table[2].sum()
 
     def centerOfMass(self, table):
-        indices = np.indices(table.shape)
-        self.COM = [np.sum(indices[dim] * table) / self.tableMass for dim in range(table.ndim)]
+        indices = np.indices(table[0].shape)
+        self.COM = [np.sum(indices[dim] * table[0]) / self.tableMass for dim in range(table[0].ndim)]
 
     def velocity(self, table):
         '''calculates velocity by confronting the center of mass of two consecutive timesteps'''
-        indices = np.indices(table.shape)
-        actualCOM = [np.sum(indices[dim] * table) / self.tableMass for dim in range(table.ndim)]
+        indices = np.indices(table[0].shape)
+        actualCOM = [np.sum(indices[dim] * table[0]) / self.tableMass for dim in range(table[0].ndim)]
         '''pac-man effect is taken into account'''
         self.vel = [min(abs(actualCOM[dim] - self.COM[dim]), table.shape[dim]-abs(actualCOM[dim] - self.COM[dim])) for dim in range(table.ndim)]
         self.LinVel = np.sqrt(self.vel[0]**2 + self.vel[1]**2)

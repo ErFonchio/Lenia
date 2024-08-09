@@ -1,7 +1,6 @@
 from tkinter import *
 from PIL import Image, ImageTk
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 
 SECONDWINDOW_BG = "white"
@@ -56,7 +55,6 @@ class Gui:
             scaledTables.append(table)
 
         t = (0.299*scaledTables[0]+0.587*scaledTables[1]+0.114*scaledTables[2])*255
-        
         self.img =  ImageTk.PhotoImage(image=Image.fromarray(t))
         self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
     

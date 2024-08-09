@@ -181,7 +181,9 @@ for k in kernels:
             distance = math.sqrt(x**2 + y**2)
             n_distance = (distance / R*len(k['b'])) / k['r']
             D[x+mid][y+mid] = (n_distance<len(k['b'])) * k['b'][np.minimum(int(n_distance),len(k['b'])-1)] * bell(n_distance%1, 0.5, 0.15)
+            
     Ds.append(D)
+print(Ds)
 #Ds = [ np.linalg.norm(np.ogrid[-mid:mid, -mid:mid]) / R * len(k['b']) / k['r'] for k in kernels ]
 #Ks = [ (D<len(k['b'])) * np.asarray(k['b'])[np.minimum(D.astype(int),len(k['b'])-1)] * bell(D%1, 0.5, 0.15) for D,k in zip(Ds,kernels) ]
 np.set_printoptions(threshold=np.inf)

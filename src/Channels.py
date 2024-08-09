@@ -9,15 +9,18 @@ class Channel:
         self.flag_update = True
         self.tk = tk
         self.table = None
+        self.tempTable = None
         self.states = 1
         self.delta = T #l'inversa determina l'incremento temporale
 
 
     def initialize_table(self, rows, cols, table):
         if table == None:
-            self.table = [[random.randint(0,1) for i in range (rows)] for j in range(cols)]
+            self.table = np.random.rand(rows,cols)
+            self.tempTable = np.zeros(rows, cols)
         else:
             self.table = np.zeros((rows, cols))
+            self.tempTable = np.zeros((rows, cols))
             tableRow, tableCol = np.shape(table)
             start_row = (rows - tableRow) // 2
             start_col = (cols - tableCol) // 2
@@ -30,12 +33,15 @@ class Channel:
         transformed_kernel = np.fft.fft2(np.fft.fftshift(kernel))
         U = np.real(np.fft.ifft2(transformed_kernel * np.fft.fft2(self.table)))
         G = (1/self.delta) * growthFunction(m=m, s=s, U=U)
-        #print(growthFunction(m=m, s=s, U=U))
-        
         return G
 
     def updateChannel(self, G, weight): 
-        self.table = np.clip(self.table+weight*G, 0, self.states)
+        self.tempTable += weight*G
+    
+    def updateChannel2(self):
+        self.table = np.clip(self.table+self.tempTable, 0, self.states)
+        self.tempTable = np.zeros(np.shape(self.table))
+        
     
 
 
