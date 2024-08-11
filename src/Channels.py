@@ -10,7 +10,7 @@ class Channel:
         self.tk = tk
         self.table = None
         self.tempTable = None
-        self.states = 1
+        self.states = 0.9
         self.delta = T #l'inversa determina l'incremento temporale
 
 
