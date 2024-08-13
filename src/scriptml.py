@@ -5,15 +5,12 @@ from Kernel import Kernel
 import random as rd
 import time
 import multiprocessing
+import json
 
-bell = lambda U, m, s: np.exp(-((U-m)/s)**2 / 2)
-NUM_EXPERIMENTS = 10
+bell = lambda x, m, s: np.exp(-((x-m)/s)**2 / 2)
+NUM_EXPERIMENTS = 20000
 NUM_FRAME = 200
-
-
-class Growth:
-    def make_bell(self, m, s, U):
-        return bell(U, m, s)*2-1
+NUM_KERNELS = 15
 
 class Kernel:
     def __init__(self, weight, c0, c1, m, s):
@@ -30,7 +27,7 @@ class Kernel:
         # n_distance: normalized distance
         # r: relative radius
         mid = table_len // 2
-        R *= 1
+        R *= 0.9
         self.kernel = np.zeros((table_len, table_len))
         for x in range(-mid, mid):
             for y in range(-mid, mid):
@@ -50,26 +47,20 @@ class Channel:
         self.states = 1
         self.delta = T #l'inversa determina l'incremento temporale
 
-
     def initialize_table(self, rows, cols, table):
-        if table == None:
-            self.table = np.random.rand(rows,cols)
-            self.tempTable = np.zeros(rows, cols)
-        else:
-            self.table = np.zeros((rows, cols))
-            self.tempTable = np.zeros((rows, cols))
-            tableRow, tableCol = np.shape(table)
-            start_row = (rows - tableRow) // 2
-            start_col = (cols - tableCol) // 2
-
-            self.table[start_row:start_row + tableRow, start_col:start_col + tableCol] = table
+        self.table = np.zeros((rows, cols))
+        self.tempTable = np.zeros((rows, cols))
+        tableRow, tableCol = np.shape(table)
+        start_row = (rows - tableRow) // 2
+        start_col = (cols - tableCol) // 2
+        self.table[start_row:start_row + tableRow, start_col:start_col + tableCol] = table
 
 
     def convolveAndGrowChannel(self, growthFunction, kernel, m, s):
         '''FFT'''
         transformed_kernel = np.fft.fft2(np.fft.fftshift(kernel))
         U = np.real(np.fft.ifft2(transformed_kernel * np.fft.fft2(self.table)))
-        G = (1/self.delta) * growthFunction(m=m, s=s, U=U)
+        G = (1/self.delta) * (growthFunction(U, m, s)*2-1)
         return G
 
     def updateChannel(self, G, weight): 
@@ -119,11 +110,16 @@ cells = [[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.04,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0
         [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.02,0.28,0.42,0.44,0.34,0.18,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.34,1.0,1.0,1.0,1.0,1.0,0.91,0.52,0.14,0], [0,0,0,0,0,0,0,0,0,0,0,0,0.01,0.17,0.75,1.0,1.0,1.0,1.0,1.0,1.0,0.93,0.35,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.22,0.92,1.0,1.0,1.0,1.0,1.0,1.0,0.59,0.09], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.75,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.71,0.16], [0,0,0,0,0,0,0,0,0,0,0,0,0.01,0.67,0.83,0.85,1.0,1.0,1.0,1.0,1.0,1.0,0.68,0.17], [0,0,0,0,0,0,0,0,0,0,0,0,0.21,0.04,0.12,0.58,0.95,1.0,1.0,1.0,1.0,1.0,0.57,0.13], [0,0,0,0,0,0,0,0,0,0,0,0.07,0,0,0,0.2,0.64,0.96,1.0,1.0,1.0,0.9,0.24,0.01], [0,0,0,0,0,0,0,0,0,0,0.13,0.29,0,0,0,0.25,0.9,1.0,1.0,1.0,1.0,0.45,0.05,0], [0,0,0,0,0,0,0,0,0,0,0.13,0.31,0.07,0,0.46,0.96,1.0,1.0,1.0,1.0,0.51,0.12,0,0], [0,0,0,0,0,0,0,0,0.26,0.82,1.0,0.95,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.3,0.05,0,0,0], [0,0,0,0,0,0,0,0,0.28,0.74,1.0,0.95,0.87,1.0,1.0,1.0,1.0,1.0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0.07,0.69,1.0,1.0,1.0,1.0,1.0,0.96,0.25,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0.4,0.72,0.9,0.83,0.7,0.56,0.43,0.14,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],
         [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0.04,0.25,0.37,0.44,0.37,0.24,0.11,0.04,0,0,0,0], [0,0,0,0,0,0,0,0,0,0.19,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.75,0.4,0.15,0,0,0,0], [0,0,0,0,0,0,0,0,0.14,0.48,0.83,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.4,0,0,0,0], [0,0,0,0,0,0,0,0,0.62,0.78,0.94,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.64,0,0,0,0], [0,0,0,0,0,0,0,0.02,0.65,0.98,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.78,0,0,0,0], [0,0,0,0,0,0,0,0.15,0.48,0.93,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.79,0.05,0,0,0], [0,0,0,0,0,0,0.33,0.56,0.8,1.0,1.0,1.0,0.37,0.6,0.94,1.0,1.0,1.0,1.0,0.68,0.05,0,0,0], [0,0,0,0,0.35,0.51,0.76,0.89,1.0,1.0,0.72,0.15,0,0.29,0.57,0.69,0.86,1.0,0.92,0.49,0,0,0,0], [0,0,0,0,0,0.38,0.86,1.0,1.0,0.96,0.31,0,0,0,0,0.02,0.2,0.52,0.37,0.11,0,0,0,0], [0,0,0.01,0,0,0.07,0.75,1.0,1.0,1.0,0.48,0.03,0,0,0,0,0,0.18,0.07,0,0,0,0,0], [0,0.11,0.09,0.22,0.15,0.32,0.71,0.94,1.0,1.0,0.97,0.54,0.12,0.02,0,0,0,0,0,0,0,0,0,0], [0.06,0.33,0.47,0.51,0.58,0.77,0.95,1.0,1.0,1.0,1.0,0.62,0.12,0,0,0,0,0,0,0,0,0,0,0], [0.04,0.4,0.69,0.88,0.95,1.0,1.0,1.0,1.0,1.0,0.93,0.68,0.22,0.02,0,0,0.01,0,0,0,0,0,0,0], [0,0.39,0.69,0.91,1.0,1.0,1.0,1.0,1.0,0.85,0.52,0.35,0.24,0.17,0.07,0,0,0,0,0,0,0,0,0], [0,0,0.29,0.82,1.0,1.0,1.0,1.0,1.0,1.0,0.67,0.29,0.02,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0.2,0.51,0.77,0.96,0.93,0.71,0.4,0.16,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0.08,0.07,0.03,0,0,0,0,0,0,0,0,0,0,0,0,0]]]
 
-def main(lock):
+def main(lock, cpu_id):
+    
     channels = [Channel(delta), Channel(delta), Channel(delta)]
+    f = open("/Users/alessandrococcia/Desktop/Lenia Tesi/src/results.json", "a")
 
-    for _ in range(NUM_EXPERIMENTS):
+    for num in range(NUM_EXPERIMENTS):
+        
         '''new random combination'''
+        new_pattern = {"name": str(cpu_id)+"-"+str(num), "T": delta, "R": radius, "mass": None, "variance": None, "kernels": []}
+        kernelList = []
         h0 = round(rd.uniform(0, 1), 5)
         h1 = round(rd.uniform(0, 1-h0), 5)
         h2 = round(1-h1-h0, 5)
@@ -133,7 +129,6 @@ def main(lock):
         h6 = round(rd.uniform(0, 1), 5)
         h7 = round(rd.uniform(0, 1-h6), 5)
         h8 = round(1-h7-h6, 5)
-
         h9 = round(rd.uniform(0, 1), 5)
         h10 = round(1-h9, 5)
         h11 = round(rd.uniform(0, 1), 5)
@@ -144,54 +139,56 @@ def main(lock):
         H = [h0, h1, h2, h3, h4, h5, h6, h7, h8, h9, h10, h11, h12, h13, h14]
         ms = []
         ss = []
-        for i in range(len(kernelSpecs)):
+
+        for i in range(NUM_KERNELS):
+
             m = round(rd.uniform(0.1, 0.5), 5)
             s = round(rd.uniform(0.03, 0.18), 5)
             ms.append(m)
             ss.append(s)
 
+            new_pattern["kernels"].append({"b": bs[i], "m": m, "s": s, "h": H[i], "r": rs[i], "c0": influence[i][0], "c1": influence[i][1]})
         
             kernel = Kernel(weight=H[i], c0=influence[i][0], c1=influence[i][1], m=m, s=s)
-            # print(H[i], influence[i][0], influence[i][1], m, s, "\n")
-            # print(radius, rs[i], bs[i], tabLen)
             kernel.create_2dgaussian_classic_fft(R=radius, r=rs[i], B=bs[i], table_len=tabLen)
-
             kernelList.append(kernel)
                 
+
         channels[0].initialize_table(rows=tabLen, cols=tabLen, table=cells[0])
         channels[1].initialize_table(rows=tabLen, cols=tabLen, table=cells[1])
         channels[2].initialize_table(rows=tabLen, cols=tabLen, table=cells[2])
 
         for _ in range(NUM_FRAME):
+        
             for r in range(len(kernelList)):
                 src = kernelList[r].channelSrc #src index
                 dst = kernelList[r].channelDst #dst index
                 G = channels[src].convolveAndGrowChannel(kernel=kernelList[r].kernel, growthFunction=bell, m=kernelList[r].m, s=kernelList[r].s)
                 channels[dst].updateChannel(G, kernelList[r].weight)
-
+            
             for c in range(len(channels)):
                 channels[c].updateChannel2()
+                
 
         '''what are the results?'''
         mass = channels[0].table.sum()+channels[1].table.sum()+channels[2].table.sum()
-        # with lock:
-        #     f.write(str(list(zip(ms, ss, rs, bs, H)))+","+ str(mass))
-        print(mass)
-        
-        '''after each experiment, reset the tables'''
-        channels[0].table = np.array(cells[0])
-        channels[1].table = np.array(cells[1])
-        channels[2].table = np.array(cells[2])
+        variance = np.var([channels[0].table, channels[1].table, channels[2].table])
+        new_pattern["mass"] = mass
+        new_pattern["variance"] = variance
+        with lock:
+            f.write(json.dumps(new_pattern)+"\n")
+
+    f.close()
 
 if __name__ == "__main__":
     processes = []
-    # num_processes = multiprocessing.cpu_count()
-    num_processes = 1
+    num_processes = 8
     lock = multiprocessing.Lock()
-    f = open("/Users/alessandrococcia/Desktop/Lenia Tesi/src/results.txt", "w")
+    # counter = multiprocessing.Value('i', 0)
+    
 
-    for _ in range(num_processes):
-        p = multiprocessing.Process(target=main, args=(lock,))
+    for n in range(num_processes):
+        p = multiprocessing.Process(target=main, args=(lock, n,))
         processes.append(p)
 
     # Avvia tutti i processi
@@ -203,7 +200,6 @@ if __name__ == "__main__":
     for p in processes:
         p.join()
 
-    f.close()
 
     end = time.time()
     #print(end-start)

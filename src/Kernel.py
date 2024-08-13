@@ -18,7 +18,7 @@ class Kernel:
         # n_distance: normalized distance
         # r: relative radius
         mid = table_len // 2
-        R *= 0.7
+        R *= 0.9
         self.kernel = np.zeros((table_len, table_len))
         for x in range(-mid, mid):
             for y in range(-mid, mid):

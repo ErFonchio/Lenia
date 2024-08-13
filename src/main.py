@@ -9,12 +9,12 @@ import cProfile
 import pstats
 import numpy as np
 
-WIDTH = 1000
+WIDTH = 1000 
 HEIGHT = 600
 FPS = 256
 TIME = int(1000/FPS)
 
-pattern = {"name":"Tessellatium gyrans","R":12,"T":2,"kernels":[
+pattern0 = {"name":"Tessellatium gyrans","R":12,"T":2,"kernels":[
         {"b":[1],"m":0.272,"s":0.0595,"h":0.138,"r":0.91,"c0":0,"c1":0},
         {"b":[1],"m":0.349,"s":0.1585,"h":0.48,"r":0.62,"c0":0,"c1":0},
         {"b":[1,1/4],"m":0.2,"s":0.0332,"h":0.284,"r":0.5,"c0":0,"c1":0},
@@ -37,6 +37,8 @@ pattern = {"name":"Tessellatium gyrans","R":12,"T":2,"kernels":[
         }
 
 
+pattern = {"name": "0-0", "T": 2, "R": 12, "mass": 332.58970540705906, "variance": 0.004612430360327471, "kernels": [{"b": [1], "m": 0.21138, "s": 0.17399, "h": 0.87027, "r": 0.91, "c0": 0, "c1": 0}, {"b": [1], "m": 0.38929, "s": 0.1646, "h": 0.02878, "r": 0.62, "c0": 0, "c1": 0}, {"b": [1, 0.25], "m": 0.16878, "s": 0.11097, "h": 0.10095, "r": 0.5, "c0": 0, "c1": 0}, {"b": [0, 1], "m": 0.13077, "s": 0.08166, "h": 0.49942, "r": 0.97, "c0": 1, "c1": 1}, {"b": [1], "m": 0.22062, "s": 0.11286, "h": 0.29613, "r": 0.72, "c0": 1, "c1": 1}, {"b": [0.83333, 1], "m": 0.39754, "s": 0.05241, "h": 0.20445, "r": 0.8, "c0": 1, "c1": 1}, {"b": [1], "m": 0.45281, "s": 0.10279, "h": 0.41591, "r": 0.96, "c0": 2, "c1": 2}, {"b": [1], "m": 0.22215, "s": 0.05777, "h": 0.49914, "r": 0.56, "c0": 2, "c1": 2}, {"b": [1], "m": 0.25117, "s": 0.0672, "h": 0.08495, "r": 0.78, "c0": 2, "c1": 2}, {"b": [0.91667, 1], "m": 0.4792, "s": 0.15212, "h": 0.2279, "r": 0.79, "c0": 0, "c1": 1}, {"b": [0.75, 1], "m": 0.2446, "s": 0.11137, "h": 0.7721, "r": 0.5, "c0": 0, "c1": 2}, {"b": [0.91667, 1], "m": 0.15241, "s": 0.05519, "h": 0.55424, "r": 0.72, "c0": 1, "c1": 0}, {"b": [1], "m": 0.46503, "s": 0.10095, "h": 0.44576, "r": 0.68, "c0": 1, "c1": 2}, {"b": [0.16667, 1, 0], "m": 0.35498, "s": 0.13048, "h": 0.54853, "r": 0.82, "c0": 2, "c1": 0}, {"b": [1], "m": 0.39881, "s": 0.15231, "h": 0.45147, "r": 0.82, "c0": 2, "c1": 1}]}
+
 class Main():
     def __init__(self):
         self.tk = Tk()
@@ -51,6 +53,7 @@ class Main():
         self.start = 0
         self.end = 0
         self.tabLen = 128
+        self.count = 0 
 
     def world(self):
         np.set_printoptions(threshold=np.inf)
@@ -62,7 +65,6 @@ class Main():
 
         '''kernel list'''
         self.kernelSpecs = pattern['kernels']
-        
         for spec in self.kernelSpecs:
             kernel = Kernel(weight=spec['h'], c0=spec['c0'], c1=spec['c1'], m=spec['m'], s=spec['s'])
             kernel.create_2dgaussian_classic_fft(R=radius, r=spec['r'], B=spec['b'], table_len=self.tabLen)
@@ -74,9 +76,9 @@ class Main():
             Channel(self.tk, delta),
             Channel(self.tk, delta)]
         
-        self.channels[0].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][0])
-        self.channels[1].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][1])
-        self.channels[2].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][2])
+        self.channels[0].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern0['cells'][0])
+        self.channels[1].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern0['cells'][1])
+        self.channels[2].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern0['cells'][2])
 
         '''loop manager for computation and rendering'''
         self.manager_loop()
@@ -86,6 +88,10 @@ class Main():
         
     def manager_loop(self):
         if self.gui.playFlag == 1:
+            self.count += 1
+            print("massa: ", self.channels[0].table.sum()+self.channels[1].table.sum()+self.channels[2].table.sum())
+            if self.count == 3:
+                return
             
             '''fps update'''
             self.end = time.time()
@@ -111,9 +117,9 @@ class Main():
             self.gui.mainloop_gui([self.channels[0].table, self.channels[1].table, self.channels[2].table]) #La gui non ha i permessi di modifica sui channel
         
         elif self.gui.playFlag == 2:
-            self.channels[0].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][0])
-            self.channels[1].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][1])
-            self.channels[2].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern['cells'][2])
+            self.channels[0].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern0['cells'][0])
+            self.channels[1].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern0['cells'][1])
+            self.channels[2].initialize_table(rows=self.tabLen, cols=self.tabLen, table=pattern0['cells'][2])
             self.gui.playFlag = 1
         
         '''viene richiamata la funzione manager_loop dopo [TIME] tempo'''
@@ -122,15 +128,15 @@ class Main():
 
 if __name__ == "__main__":
 
-    '''test per profiling'''
-    profiler = cProfile.Profile()
-    profiler.enable()
+    # '''test per profiling'''
+    # profiler = cProfile.Profile()
+    # profiler.enable()
     
     m = Main()
     m.world()
 
-    '''test profiling'''
-    profiler.disable()
-    stats = pstats.Stats(profiler).sort_stats('cumtime')
-    stats.print_stats()
-    stats.dump_stats('profile_results.prof')
+    # '''test profiling'''
+    # profiler.disable()
+    # stats = pstats.Stats(profiler).sort_stats('cumtime')
+    # stats.print_stats()
+    # stats.dump_stats('profile_results.prof')
