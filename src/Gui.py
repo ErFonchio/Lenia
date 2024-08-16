@@ -111,6 +111,10 @@ class Gui:
         self.labelAngle.place(x=10, y=160+padding)
         self.labelAngularVel = Label(self.secondframe, text="Angular Velocity: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
         self.labelAngularVel.place(x=10, y=190+padding)
+        self.labelVariance = Label(self.secondframe, text="Variance: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
+        self.labelVariance.place(x=10, y=220+padding)
+        self.labelVarianceVelocity = Label(self.secondframe, text="Variance Velocity: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
+        self.labelVarianceVelocity.place(x=10, y=250+padding)
 
     def saveFunction(self):
         self.saveFlag = 1
@@ -143,11 +147,14 @@ class Gui:
 
     def updateFps(self, realTimeFPS):
         self.labelFps.config(text="FPS: "+str(realTimeFPS)[:4])
-    def updateGuiStats(self, mass, COM, vel, linVel, angle, angularVel):
+    def updateGuiStats(self, mass, COM, vel, linVel, angle, angularVel, variance, varianceVel):
         self.labelMass.config(text="Mass: "+str(mass)[:4]+" u")
         self.labelCOM.config(text="COM_x: "+str(COM[1])[:4]+"px, COM_y: "+str(COM[0])[:4]+" px")
         self.labelVel.config(text="V_x: "+str(vel[1])[:4]+"px/f V_y: "+str(vel[0])[:4]+" px/f")
         self.labelLinVel.config(text="|V|: "+str(linVel)[:4]+" px/f")
         self.labelAngle.config(text="Angle: "+str(angle)[:4]+" rad")
         self.labelAngularVel.config(text="AngularVel: "+str(angularVel)[:4]+" rad/f")
+        self.labelVariance.config(text="Variance x1000: "+str(variance)[:4])
+        self.labelVarianceVelocity.config(text="VarianceVel x1000: "+str(varianceVel)[:4])
+
 

@@ -75,7 +75,8 @@ class Main():
             self.stats.updateStats([self.channels[0].table, self.channels[1].table, self.channels[2].table])
             self.gui.updateGuiStats(mass=self.stats.tableMass, COM=self.stats.COM_RGB, 
                                     vel=self.stats.vel, linVel=self.stats.LinVel, 
-                                    angle=self.stats.ang, angularVel=self.stats.angularVel)
+                                    angle=self.stats.ang, angularVel=self.stats.angularVel, 
+                                    variance=self.stats.var, varianceVel=self.stats.varVel)
             '''Il manager aggiorna la griglia e poi avvia la stampa tramite la GUI'''
             for i in range(len(self.kernelList)):
                 src = self.kernelList[i].channelSrc #src index
@@ -104,7 +105,6 @@ class Main():
                 self.channels[1].putRandomValues(self.gui.lastClickFlag, radius, self.gui.canvasDimensions)
                 self.channels[2].putRandomValues(self.gui.lastClickFlag, radius, self.gui.canvasDimensions)
                 self.gui.clickFlag = 0
-                
 
             '''il manager avvia il loop della gui'''
             self.gui.mainloop_gui([self.channels[0].table, self.channels[1].table, self.channels[2].table]) #La gui non ha i permessi di modifica sui channel
@@ -141,8 +141,6 @@ class Main():
         self.channels[0].initialize_table(rows=self.tabLen, cols=self.tabLen, table=cells[0])
         self.channels[1].initialize_table(rows=self.tabLen, cols=self.tabLen, table=cells[1])
         self.channels[2].initialize_table(rows=self.tabLen, cols=self.tabLen, table=cells[2])
-
-
 
 if __name__ == "__main__":
 

@@ -13,6 +13,61 @@ NUM_EXPERIMENTS = 20000
 NUM_FRAME = 200
 NUM_KERNELS = 15
 
+class Statistics:
+    def __init__(self): 
+        self.table = None
+        self.tableMass = 0
+        self.COM_RGB = [0,0]
+        self.vel = [0,0]
+        self.LinVel = 0
+        self.ang = 0
+        self.angularVel = 0
+        self.var = 0.0
+        self.varVel = 0.0
+
+    def updateStats(self, table):
+        self.mass(table)
+        self.varianceVelocity(table)
+        self.variance(table)
+        self.velocity(table) #velocity always before center of mass 
+        self.centerOfMass(table)
+        self.angularVelocity()
+        self.angle()
+        
+    def mass(self, table):
+        self.tableMass = table[0].sum()+table[1].sum()+table[2].sum()
+
+    def centerOfMass(self, table):
+        indices = np.indices(table[0].shape)
+        actualCOM_R = [np.sum(indices[dim] * table[0]) / self.tableMass for dim in range(table[0].ndim)]
+        actualCOM_G = [np.sum(indices[dim] * table[1]) / self.tableMass for dim in range(table[0].ndim)]
+        actualCOM_B = [np.sum(indices[dim] * table[2]) / self.tableMass for dim in range(table[0].ndim)]
+        self.COM_RGB = [(actualCOM_R[0]+actualCOM_G[0]+actualCOM_B[0])/3, (actualCOM_R[1]+actualCOM_G[1]+actualCOM_B[1])/3]
+
+    def velocity(self, table):
+        '''calculates velocity by confronting the center of mass of two consecutive timesteps'''
+        indices = np.indices(table[0].shape)
+        actualCOM_R = [np.sum(indices[dim] * table[0]) / self.tableMass for dim in range(table[0].ndim)]
+        actualCOM_G = [np.sum(indices[dim] * table[1]) / self.tableMass for dim in range(table[0].ndim)]
+        actualCOM_B = [np.sum(indices[dim] * table[2]) / self.tableMass for dim in range(table[0].ndim)]
+        actualCOM_RGB = [(actualCOM_R[0]+actualCOM_G[0]+actualCOM_B[0])/3, (actualCOM_R[1]+actualCOM_G[1]+actualCOM_B[1])/3]
+
+        '''pac-man effect is taken into account'''
+        self.vel = [min(abs(actualCOM_RGB[dim] - self.COM_RGB[dim]), table[0].shape[dim]-abs(actualCOM_RGB[dim] - self.COM_RGB[dim])) for dim in range(table[0].ndim)]
+        self.LinVel = np.sqrt(self.vel[0]**2 + self.vel[1]**2)
+        return self.LinVel
+    
+    def angle(self):
+        self.ang = np.arctan(self.vel[1]/self.vel[0])
+    def angularVelocity(self):
+        self.angularVel = np.arctan(self.vel[1]/self.vel[0])-self.ang
+    def variance(self, channels):
+        self.var = np.var([channels[0], channels[1], channels[2]])*1000
+        return self.var
+    def varianceVelocity(self, channels):
+        self.varVel = np.var([channels[0], channels[1], channels[2]])*1000-self.var
+
+
 class Kernel:
     def __init__(self, weight, c0, c1, m, s):
         self.kernel = None
@@ -117,9 +172,12 @@ def main(lock, cpu_id, counter):
     f = open("/Users/alessandrococcia/Desktop/Lenia Tesi/src/results1.json", "a")
 
     for num in range(NUM_EXPERIMENTS):
+
+        stats = Statistics()
         
         '''new random combination'''
-        new_pattern = {"name": str(cpu_id)+"-"+str(num), "T": delta, "R": radius, "mass": None, "variance": None, "kernels": [], 
+        new_pattern = {"name": str(cpu_id)+"-"+str(num), "T": delta, "R": radius, "mass": None, "variance": None, "averageLinearSpeed": None,
+                        "averageVariance": None, "averageVarianceSpeed":None, "kernels": [], 
                        "ColorR": None, "ColorG": None, "ColorB": None, "massR": None, "massG": None, "massB": None}
         kernelList = []
         h0 = round(rd.uniform(0, 1), 5)
@@ -160,8 +218,12 @@ def main(lock, cpu_id, counter):
         channels[1].initialize_table(rows=tabLen, cols=tabLen, table=cells[1])
         channels[2].initialize_table(rows=tabLen, cols=tabLen, table=cells[2])
 
+        averageSpeed = 0
+        averageVariance = 0
+        averageVarianceSpeed = 0
+
         for _ in range(NUM_FRAME):
-        
+            stats.updateStats([channels[0].table, channels[1].table, channels[2].table])
             for r in range(len(kernelList)):
                 src = kernelList[r].channelSrc #src index
                 dst = kernelList[r].channelDst #dst index
@@ -170,6 +232,10 @@ def main(lock, cpu_id, counter):
             
             for c in range(len(channels)):
                 channels[c].updateChannel2()
+            
+            averageSpeed += stats.LinVel
+            averageVariance += stats.var
+            averageVarianceSpeed += stats.varVel
                 
         '''what are the results?'''
         R = channels[0].table
@@ -187,6 +253,9 @@ def main(lock, cpu_id, counter):
         new_pattern["ColorR"] = round(ColorR, 5)
         new_pattern["ColorG"] = round(ColorG, 5)
         new_pattern["ColorB"] = round(ColorB, 5)
+        new_pattern["averageLinearSpeed"] = round(averageSpeed/NUM_FRAME, 5)
+        new_pattern["averageVariance"] = round(averageVariance/NUM_FRAME, 5)
+        new_pattern["averageVarianceSpeed"] = round(averageVarianceSpeed/NUM_FRAME, 5)
 
         with lock:
             f.write(json.dumps(new_pattern)+"\n")

@@ -12,18 +12,17 @@ class Statistics:
         self.LinVel = 0
         self.ang = 0
         self.angularVel = 0
-        self.var = 0
-        self.varVel = 0
+        self.var = 0.0
+        self.varVel = 0.0
 
     def updateStats(self, table):
         self.mass(table)
-        self.variance(table)
         self.varianceVelocity(table)
+        self.variance(table)
         self.velocity(table) #velocity always before center of mass 
         self.centerOfMass(table)
         self.angularVelocity()
         self.angle()
-        
         
     def mass(self, table):
         self.tableMass = table[0].sum()+table[1].sum()+table[2].sum()
@@ -53,10 +52,10 @@ class Statistics:
     def angularVelocity(self):
         self.angularVel = np.arctan(self.vel[1]/self.vel[0])-self.ang
     def variance(self, channels):
-        self.var = np.var([channels[0], channels[1], channels[2]])
+        self.var = np.var([channels[0], channels[1], channels[2]])*1000
         return self.var
     def varianceVelocity(self, channels):
-        self.varVel = np.var([channels[0], channels[1], channels[2]])-self.var
-        return self.varVel
+        self.varVel = np.var([channels[0], channels[1], channels[2]])*1000-self.var
+
 
 
