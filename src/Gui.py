@@ -7,7 +7,7 @@ SECONDWINDOW_BG = "white"
 
 
 class Gui:
-    def __init__(self, WIDTH, HEIGHT, FPS, window):
+    def __init__(self, WIDTH, HEIGHT, FPS, window, tabLen):
         self.root = window
         self.root.title("Lenia")
         self.width = WIDTH
@@ -18,6 +18,14 @@ class Gui:
         self.SECONDFRAME_H = HEIGHT
         self.FPS = FPS
         self.playFlag = 1 #flag for play and stop button
+        self.saveFlag = 0 #flag for save button
+        self.nextFlag = 0 #flag for next button
+        self.prevFlag = 0 #flag for prev button
+        self.clickFlag = 0
+        self.lastClickFlag = 0, 0
+        self.zoom = 4
+        self.tabLen = tabLen
+        self.canvasDimensions = self.zoom*self.tabLen, self.zoom*self.tabLen
 
         '''initializing mainframe and secondframe'''
         self.root.maxsize(self.width, self.height)
@@ -34,24 +42,19 @@ class Gui:
         self.initialize_secondwindow()
         
         self.img = None
-        self.canvas = Canvas(self.mainframe, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
+        self.canvas = Canvas(self.mainframe, width=self.canvasDimensions[0], height=self.canvasDimensions[1])
         self.canvas.pack()
+
+        self.canvas.bind("<Button-1>", self.click)
 
     def mainloop_gui(self, tableList):
         self.printTable(tableList)
         
-
-    def print_kernel(self, kernel, padx=10, pady=10):
-        kernel = self.matrix_scaling(kernel, 30, 30)
-        kernel = self.color_mapping(kernel)
-        self.img =  ImageTk.PhotoImage(image=Image.fromarray(kernel))
-        self.canvas.create_image(padx, pady, anchor="nw", image=self.img)
     
-    def printTable(self, tableList, padx=10, pady=10):
-        zoom = 4
+    def printTable(self, tableList, padx=0, pady=0):
         scaledTables = []
         for i in range(len(tableList)):
-            table = np.kron(tableList[i], np.ones((zoom, zoom)))
+            table = np.kron(tableList[i], np.ones((self.zoom, self.zoom)))
             scaledTables.append(table)
 
         t = (0.299*scaledTables[0]+0.587*scaledTables[1]+0.114*scaledTables[2])*255
@@ -67,7 +70,6 @@ class Gui:
         return colored_table
 
     def initialize_secondwindow(self):
-        
         self.initialize_buttons()
         self.initialize_labels()
 
@@ -81,24 +83,46 @@ class Gui:
         self.stopButton.grid(row=0, column=1)
         self.resetButton = Button(self.secondframe, text="Reset", command=self.reset, highlightbackground=SECONDWINDOW_BG)
         self.resetButton.grid(row=0, column=2)
+        self.saveButton = Button(self.secondframe, text="Save", command=self.saveFunction, highlightbackground=SECONDWINDOW_BG)
+        self.saveButton.grid(row=1, column=0)
+        self.nextButton = Button(self.secondframe, text="Next", command=self.nextFunction, highlightbackground=SECONDWINDOW_BG)
+        self.nextButton.grid(row=1, column=2)
+        self.prevButton = Button(self.secondframe, text="Prev", command=self.prevFunction, highlightbackground=SECONDWINDOW_BG)
+        self.prevButton.grid(row=1, column=1)
 
         self.buttonList.append(self.playButton)
         self.buttonList.append(self.stopButton)
         self.buttonList.append(self.resetButton)
+        self.buttonList.append(self.saveButton)
+        self.buttonList.append(self.prevButton)
+        self.buttonList.append(self.nextButton)
 
     def initialize_labels(self):
+        padding = 30
         self.labelMass = Label(self.secondframe, text="Mass: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
-        self.labelMass.place(x=10, y=40)
+        self.labelMass.place(x=10, y=40+padding)
         self.labelCOM = Label(self.secondframe, text="Center of Mass: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
-        self.labelCOM.place(x=10, y=70)
+        self.labelCOM.place(x=10, y=70+padding)
         self.labelVel = Label(self.secondframe, text="Velocity: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
-        self.labelVel.place(x=10, y=100)
+        self.labelVel.place(x=10, y=100+padding)
         self.labelLinVel = Label(self.secondframe, text="Linear Velocity: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
-        self.labelLinVel.place(x=10, y=130)
+        self.labelLinVel.place(x=10, y=130+padding)
         self.labelAngle = Label(self.secondframe, text="Angle: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
-        self.labelAngle.place(x=10, y=160)
+        self.labelAngle.place(x=10, y=160+padding)
         self.labelAngularVel = Label(self.secondframe, text="Angular Velocity: ", font=("Helvetica", 16), highlightbackground=SECONDWINDOW_BG)
-        self.labelAngularVel.place(x=10, y=190)
+        self.labelAngularVel.place(x=10, y=190+padding)
+
+    def saveFunction(self):
+        self.saveFlag = 1
+        print("Hai premuto save")
+
+    def nextFunction(self):
+        self.nextFlag = 1
+        print("Hai premuto next")
+    
+    def prevFunction(self):
+        self.prevFlag = 1
+        print("Hai premuto prev")
 
     def play(self):
         self.playFlag = 1
@@ -111,6 +135,11 @@ class Gui:
     def reset(self):
         self.playFlag = 2
         print("Hai premuto reset")
+
+    def click(self, event):
+        self.clickFlag = 1
+        self.lastClickFlag = event.x, event.y
+        print("Hai cliccato col tasto sinistro nella posizione: ", event.x, event.y)
 
     def updateFps(self, realTimeFPS):
         self.labelFps.config(text="FPS: "+str(realTimeFPS)[:4])

@@ -6,6 +6,7 @@ import random as rd
 import time
 import multiprocessing
 import json
+import sys
 
 bell = lambda x, m, s: np.exp(-((x-m)/s)**2 / 2)
 NUM_EXPERIMENTS = 20000
@@ -110,15 +111,16 @@ cells = [[[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.04,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0
         [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.02,0.28,0.42,0.44,0.34,0.18,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.34,1.0,1.0,1.0,1.0,1.0,0.91,0.52,0.14,0], [0,0,0,0,0,0,0,0,0,0,0,0,0.01,0.17,0.75,1.0,1.0,1.0,1.0,1.0,1.0,0.93,0.35,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.22,0.92,1.0,1.0,1.0,1.0,1.0,1.0,0.59,0.09], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.75,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.71,0.16], [0,0,0,0,0,0,0,0,0,0,0,0,0.01,0.67,0.83,0.85,1.0,1.0,1.0,1.0,1.0,1.0,0.68,0.17], [0,0,0,0,0,0,0,0,0,0,0,0,0.21,0.04,0.12,0.58,0.95,1.0,1.0,1.0,1.0,1.0,0.57,0.13], [0,0,0,0,0,0,0,0,0,0,0,0.07,0,0,0,0.2,0.64,0.96,1.0,1.0,1.0,0.9,0.24,0.01], [0,0,0,0,0,0,0,0,0,0,0.13,0.29,0,0,0,0.25,0.9,1.0,1.0,1.0,1.0,0.45,0.05,0], [0,0,0,0,0,0,0,0,0,0,0.13,0.31,0.07,0,0.46,0.96,1.0,1.0,1.0,1.0,0.51,0.12,0,0], [0,0,0,0,0,0,0,0,0.26,0.82,1.0,0.95,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.3,0.05,0,0,0], [0,0,0,0,0,0,0,0,0.28,0.74,1.0,0.95,0.87,1.0,1.0,1.0,1.0,1.0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0.07,0.69,1.0,1.0,1.0,1.0,1.0,0.96,0.25,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0.4,0.72,0.9,0.83,0.7,0.56,0.43,0.14,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],
         [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0,0,0,0,0.04,0.25,0.37,0.44,0.37,0.24,0.11,0.04,0,0,0,0], [0,0,0,0,0,0,0,0,0,0.19,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.75,0.4,0.15,0,0,0,0], [0,0,0,0,0,0,0,0,0.14,0.48,0.83,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.4,0,0,0,0], [0,0,0,0,0,0,0,0,0.62,0.78,0.94,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.64,0,0,0,0], [0,0,0,0,0,0,0,0.02,0.65,0.98,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.78,0,0,0,0], [0,0,0,0,0,0,0,0.15,0.48,0.93,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.79,0.05,0,0,0], [0,0,0,0,0,0,0.33,0.56,0.8,1.0,1.0,1.0,0.37,0.6,0.94,1.0,1.0,1.0,1.0,0.68,0.05,0,0,0], [0,0,0,0,0.35,0.51,0.76,0.89,1.0,1.0,0.72,0.15,0,0.29,0.57,0.69,0.86,1.0,0.92,0.49,0,0,0,0], [0,0,0,0,0,0.38,0.86,1.0,1.0,0.96,0.31,0,0,0,0,0.02,0.2,0.52,0.37,0.11,0,0,0,0], [0,0,0.01,0,0,0.07,0.75,1.0,1.0,1.0,0.48,0.03,0,0,0,0,0,0.18,0.07,0,0,0,0,0], [0,0.11,0.09,0.22,0.15,0.32,0.71,0.94,1.0,1.0,0.97,0.54,0.12,0.02,0,0,0,0,0,0,0,0,0,0], [0.06,0.33,0.47,0.51,0.58,0.77,0.95,1.0,1.0,1.0,1.0,0.62,0.12,0,0,0,0,0,0,0,0,0,0,0], [0.04,0.4,0.69,0.88,0.95,1.0,1.0,1.0,1.0,1.0,0.93,0.68,0.22,0.02,0,0,0.01,0,0,0,0,0,0,0], [0,0.39,0.69,0.91,1.0,1.0,1.0,1.0,1.0,0.85,0.52,0.35,0.24,0.17,0.07,0,0,0,0,0,0,0,0,0], [0,0,0.29,0.82,1.0,1.0,1.0,1.0,1.0,1.0,0.67,0.29,0.02,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0.2,0.51,0.77,0.96,0.93,0.71,0.4,0.16,0,0,0,0,0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0,0.08,0.07,0.03,0,0,0,0,0,0,0,0,0,0,0,0,0]]]
 
-def main(lock, cpu_id):
+def main(lock, cpu_id, counter):
     
     channels = [Channel(delta), Channel(delta), Channel(delta)]
-    f = open("/Users/alessandrococcia/Desktop/Lenia Tesi/src/results.json", "a")
+    f = open("/Users/alessandrococcia/Desktop/Lenia Tesi/src/results1.json", "a")
 
     for num in range(NUM_EXPERIMENTS):
         
         '''new random combination'''
-        new_pattern = {"name": str(cpu_id)+"-"+str(num), "T": delta, "R": radius, "mass": None, "variance": None, "kernels": []}
+        new_pattern = {"name": str(cpu_id)+"-"+str(num), "T": delta, "R": radius, "mass": None, "variance": None, "kernels": [], 
+                       "ColorR": None, "ColorG": None, "ColorB": None, "massR": None, "massG": None, "massB": None}
         kernelList = []
         h0 = round(rd.uniform(0, 1), 5)
         h1 = round(rd.uniform(0, 1-h0), 5)
@@ -169,14 +171,29 @@ def main(lock, cpu_id):
             for c in range(len(channels)):
                 channels[c].updateChannel2()
                 
-
         '''what are the results?'''
-        mass = channels[0].table.sum()+channels[1].table.sum()+channels[2].table.sum()
-        variance = np.var([channels[0].table, channels[1].table, channels[2].table])
-        new_pattern["mass"] = mass
-        new_pattern["variance"] = variance
+        R = channels[0].table
+        G = channels[1].table
+        B = channels[2].table
+        area = R.shape[0]*R.shape[1]
+        massR = R.sum()
+        massG = G.sum()
+        massB = B.sum()
+        mass = massR+massG+massB
+        variance = np.var([R, G, B])
+        ColorR, ColorG, ColorB = massR/area, massG/area, massB/area #density of each table
+        new_pattern["mass"] = round(mass, 5)
+        new_pattern["variance"] = round(variance, 5)
+        new_pattern["ColorR"] = round(ColorR, 5)
+        new_pattern["ColorG"] = round(ColorG, 5)
+        new_pattern["ColorB"] = round(ColorB, 5)
+
         with lock:
             f.write(json.dumps(new_pattern)+"\n")
+            counter.value += 1
+            # Stampa il progresso sovrascrivendo la riga precedente
+            print(f"\rTask completati: {counter.value}", end="")
+            sys.stdout.flush()  # Assicura che la stampa avvenga immediatamente
 
     f.close()
 
@@ -184,11 +201,10 @@ if __name__ == "__main__":
     processes = []
     num_processes = 8
     lock = multiprocessing.Lock()
-    # counter = multiprocessing.Value('i', 0)
+    counter = multiprocessing.Value("i", 0)
     
-
     for n in range(num_processes):
-        p = multiprocessing.Process(target=main, args=(lock, n,))
+        p = multiprocessing.Process(target=main, args=(lock, n, counter,))
         processes.append(p)
 
     # Avvia tutti i processi
@@ -200,8 +216,6 @@ if __name__ == "__main__":
     for p in processes:
         p.join()
 
-
     end = time.time()
-    #print(end-start)
 
     print("Tutti i processi sono stati completati.")
