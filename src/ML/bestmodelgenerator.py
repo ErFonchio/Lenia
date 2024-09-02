@@ -13,10 +13,6 @@ def read_json_file2(file_path):
     with open(file_path, "r") as f:
         return [json.loads(line) for line in f]
 
-# AverageLinearSpeed: alpha 0.1, lr: 0.001, max_iter 200, hiden_layer_sizes: [30, 30, 30]
-# AverageMass: alpha 0.1, lr: 0.01, "adaptive", hidden_layer_sizes": {"desc": null,"value": [30,30,30]}, max_iter 200
-# AverageVariance: alpha 0.001, lr: 0.001, lr adaptive, max_iter 200, "hidden_layer_sizes": {"desc": null,"value": [30,50,30,50,30]},
-
 # Carica i dati
 results4 = pd.DataFrame(read_json_file2("src/masstestClassifier2_LowFiltered_200iterations.json"))
 
@@ -93,7 +89,6 @@ for batch in training_parameter_batch:
     mlp = MLPRegressor(hidden_layer_sizes=batch['hidden_layer_sizes'], max_iter=batch['max_iter'], random_state=42, 
                     learning_rate=batch['learning_rate'], alpha=batch['alpha'], learning_rate_init=batch['learning_rate_init'])
 
-    # Addestra il modello con una barra di progresso e registra su W&B
     for i in range(mlp.max_iter):
         mlp.partial_fit(X, y)
         training_results = mlp.score(X, y)

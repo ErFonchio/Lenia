@@ -10,10 +10,6 @@ def read_json_file2(file_path):
     with open(file_path, "r") as f:
         return [json.loads(line) for line in f]
 
-# AverageLinearSpeed: alpha 0.1, lr: 0.001
-# AverageMass: alpha 0.1, lr: 0.01
-# AverageVariance: alpha 0.001, lr: 0.001
-
 # Carica i dati
 results4 = pd.DataFrame(read_json_file2("src/masstestClassifier2.json"))
 
