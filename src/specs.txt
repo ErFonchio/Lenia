@@ -1,0 +1,7 @@
+15 kernel:
+    m, s, h
+
+range: 
+    - m: [0.050, 0.500]
+    - s: [0.03, 0.18]
+    - h: [somma dei primi tre = 1 + somma degli ultimi tre = 1]

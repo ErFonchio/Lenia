@@ -1,0 +1,34 @@
+2024-08-23 10:49:45,423 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Current SDK version is 0.17.7
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Configure stats pid to 52303
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Loading settings from /Users/alessandrococcia/.config/wandb/settings
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Loading settings from /Users/alessandrococcia/Desktop/Lenia Tesi/wandb/settings
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'src/ML/datacleaning.py', 'program_abspath': '/Users/alessandrococcia/Desktop/Lenia Tesi/src/ML/datacleaning.py', 'program': '/Users/alessandrococcia/Desktop/Lenia Tesi/src/ML/datacleaning.py'}
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_setup.py:_flush():76] Applying login settings: {}
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_init.py:_log_setup():524] Logging user logs to /Users/alessandrococcia/Desktop/Lenia Tesi/wandb/run-20240823_104945-ntvutves/logs/debug.log
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_init.py:_log_setup():525] Logging internal logs to /Users/alessandrococcia/Desktop/Lenia Tesi/wandb/run-20240823_104945-ntvutves/logs/debug-internal.log
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_init.py:init():607] calling init triggers
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_init.py:init():614] wandb.init called with sweep_config: {}
+config: {'learning_rate': 'adaptive', 'learning_rate_init': 0.001, 'alpha': 0.001, 'hidden_layer_sizes': (30, 50, 30, 50, 30), 'max_iter': 200}
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_init.py:init():657] starting backend
+2024-08-23 10:49:45,424 INFO    MainThread:52303 [wandb_init.py:init():661] setting up manager
+2024-08-23 10:49:45,426 INFO    MainThread:52303 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=spawn,fork,forkserver, using: spawn
+2024-08-23 10:49:45,426 INFO    MainThread:52303 [wandb_init.py:init():669] backend started and connected
+2024-08-23 10:49:45,439 INFO    MainThread:52303 [wandb_init.py:init():764] updated telemetry
+2024-08-23 10:49:45,479 INFO    MainThread:52303 [wandb_init.py:init():797] communicating run to backend with 90.0 second timeout
+2024-08-23 10:49:46,619 INFO    MainThread:52303 [wandb_run.py:_on_init():2479] communicating current version
+2024-08-23 10:49:46,835 INFO    MainThread:52303 [wandb_run.py:_on_init():2488] got version response 
+2024-08-23 10:49:46,835 INFO    MainThread:52303 [wandb_init.py:init():848] starting run threads in backend
+2024-08-23 10:49:47,378 INFO    MainThread:52303 [wandb_run.py:_console_start():2457] atexit reg
+2024-08-23 10:49:47,378 INFO    MainThread:52303 [wandb_run.py:_redirect():2303] redirect: wrap_raw
+2024-08-23 10:49:47,379 INFO    MainThread:52303 [wandb_run.py:_redirect():2368] Wrapping output streams.
+2024-08-23 10:49:47,379 INFO    MainThread:52303 [wandb_run.py:_redirect():2393] Redirects installed.
+2024-08-23 10:49:47,379 INFO    MainThread:52303 [wandb_init.py:init():891] run started, returning control to user process
+2024-08-23 11:07:14,992 INFO    MainThread:52303 [wandb_run.py:_finish():2154] finishing run alecoccia-sapienza-universit-di-roma/Lenia/ntvutves
+2024-08-23 11:07:14,998 INFO    MainThread:52303 [wandb_run.py:_atexit_cleanup():2418] got exitcode: 0
+2024-08-23 11:07:14,999 INFO    MainThread:52303 [wandb_run.py:_restore():2400] restore
+2024-08-23 11:07:15,000 INFO    MainThread:52303 [wandb_run.py:_restore():2406] restore done
+2024-08-23 11:07:21,861 INFO    MainThread:52303 [wandb_run.py:_footer_history_summary_info():4076] rendering history
+2024-08-23 11:07:21,864 INFO    MainThread:52303 [wandb_run.py:_footer_history_summary_info():4108] rendering summary
+2024-08-23 11:07:21,882 INFO    MainThread:52303 [wandb_run.py:_footer_sync_info():4035] logging synced files

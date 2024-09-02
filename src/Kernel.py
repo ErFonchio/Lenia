@@ -1,45 +1,32 @@
 import numpy as np
 import math
 
+bell = lambda x, m, s: np.exp(-((x-m)/s)**2 / 2)
+
 class Kernel:
-    def __init__(self):
-        self.sigma = None
-        self.m = None
-        self.len = None
+    def __init__(self, weight, c0, c1, m, s):
         self.kernel = None
+        self.weight = weight
+        self.channelSrc = c0
+        self.channelDst = c1
+        self.m = m
+        self.s = s
     
-    #Funziona
-    def create_2dgaussian_classic(self, m, s, len):
-        radius = len//2
-        K = np.zeros((len, len))
-        for x in range(-radius, radius+1):
-            for y in range(-radius, radius+1):
-                distance = math.sqrt(x**2 + y**2)
-                n_distance = distance / radius
-                K[x+radius][y+radius] = np.exp(-((n_distance-m)/s)**2 / 2)
-        
-        somma = np.sum(K)
-        K /= somma
-        self.kernel = K
-        return K, somma
-    
-    def create_2dgaussian_classic_fft(self, m, s, kernel_len, table_len):
-        radius = kernel_len//2
-        K = np.zeros((kernel_len, kernel_len))
-        for x in range(-radius, radius+1):
-            for y in range(-radius, radius+1):
-                distance = math.sqrt(x**2 + y**2)
-                n_distance = distance / radius
-                K[x+radius][y+radius] = np.exp(-((n_distance-m)/s)**2 / 2)
-        
-        somma = np.sum(K)
-        K /= somma
-        '''initalizing kernel with table_len dimension for fft'''
+    def create_2dgaussian_classic_fft(self, R, r, B, table_len):
+        # R: kernel radius
+        # B: array of kernel's spikes
+        # n_distance: normalized distance
+        # r: relative radius
+        mid = table_len // 2
+        R *= 0.9
         self.kernel = np.zeros((table_len, table_len))
-        '''putting significative values in the heart of the kernel'''
-        self.kernel[table_len//2-radius:table_len//2+radius+1, table_len//2-radius:table_len//2+radius+1] = K
+        for x in range(-mid, mid):
+            for y in range(-mid, mid):
+                distance = math.sqrt(x**2 + y**2)
+                n_distance = (distance / R*len(B)) / r
+                self.kernel[x+mid][y+mid] = (n_distance<len(B)) * B[np.minimum(int(n_distance),len(B)-1)] * np.exp(-((n_distance%1-0.5)/0.15)**2 / 2)# da rivedere
+        self.kernel /= np.sum(self.kernel)
+        return self.kernel
 
-        return self.kernel, somma
 
-    def create_2dGameOfLifeKernel(self):
-        self.kernel = [[1,1,1], [1,0,1], [1,1,1]]
+    
