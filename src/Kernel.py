@@ -24,7 +24,9 @@ class Kernel:
             for y in range(-mid, mid):
                 distance = math.sqrt(x**2 + y**2)
                 n_distance = (distance / R*len(B)) / r
-                self.kernel[x+mid][y+mid] = (n_distance<len(B)) * B[np.minimum(int(n_distance),len(B)-1)] * np.exp(-((n_distance%1-0.5)/0.15)**2 / 2)# da rivedere
+                self.kernel[x+mid][y+mid] = (n_distance<len(B)) * B[np.minimum(int(n_distance),len(B)-1)] * np.exp(-((n_distance%1-0.5)/0.15)**2 / 2)
+        
+        # normalization -> all the cells have values between 0 and 1
         self.kernel /= np.sum(self.kernel)
         return self.kernel
 

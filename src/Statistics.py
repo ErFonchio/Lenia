@@ -1,8 +1,6 @@
 from tkinter import *
 import numpy as np
 
-'''alle stats è lasciato il calcolo delle statistiche'''
-
 class Statistics:
     def __init__(self): 
         self.table = None
@@ -44,6 +42,7 @@ class Statistics:
 
     def varianceVelocityLowFilter(self):
         if self.tableMass > 0.01:
+            '''(1 - constant) * old + constant * new'''
             self.varVelLowFilter = self.varVelLowFilter + self.filterConstant * (self.varVel - self.varVel)
         else:
             self.varVelLowFilter = 0
@@ -53,11 +52,10 @@ class Statistics:
     def centerOfMass(self, table):
         if self.tableMass > 0.01:
             indices = np.indices(table[0].shape)
-            if self.tableMass != 0:
-                actualCOM_R = [np.sum(indices[dim] * table[0]) / self.tableMass for dim in range(table[0].ndim)]
-                actualCOM_G = [np.sum(indices[dim] * table[1]) / self.tableMass for dim in range(table[0].ndim)]
-                actualCOM_B = [np.sum(indices[dim] * table[2]) / self.tableMass for dim in range(table[0].ndim)]
-                self.COM_RGB = [(actualCOM_R[0]+actualCOM_G[0]+actualCOM_B[0])/3, (actualCOM_R[1]+actualCOM_G[1]+actualCOM_B[1])/3]
+            actualCOM_R = [np.sum(indices[dim] * table[0]) / self.tableMass for dim in range(table[0].ndim)]
+            actualCOM_G = [np.sum(indices[dim] * table[1]) / self.tableMass for dim in range(table[0].ndim)]
+            actualCOM_B = [np.sum(indices[dim] * table[2]) / self.tableMass for dim in range(table[0].ndim)]
+            self.COM_RGB = [(actualCOM_R[0]+actualCOM_G[0]+actualCOM_B[0])/3, (actualCOM_R[1]+actualCOM_G[1]+actualCOM_B[1])/3]
         else:
             self.COM_RGB = [0,0]
 

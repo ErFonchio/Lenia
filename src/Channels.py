@@ -11,7 +11,7 @@ class Channel:
         self.table = None
         self.tempTable = None
         self.states = 1
-        self.delta = T #l'inversa determina l'incremento temporale
+        self.delta = T # needed to emulates time continuity
         self.G = None
         self.U = None
 
@@ -38,14 +38,15 @@ class Channel:
         return G, U
 
     def updateChannel(self, G, weight): 
+        '''the weight will determin the influence between two channels'''
         self.tempTable += weight*G
     
     def updateChannel2(self):
+        '''finally updating the channel'''
         self.table = np.clip(self.table+self.tempTable, 0, self.states)
         self.tempTable = np.zeros(np.shape(self.table))
 
-    def putRandomValues(self, center, radius, canvasDimensions):
-        # Calcola l'angolo superiore sinistro del quadrato 32x32
+    def putRandomValues(self, center, radius, canvasDimensions, zoom):
         start_x = max(0, center[0] - radius)  # Limita la coordinata per evitare di uscire dai bordi
         start_y = max(0, center[1] - radius)
         
@@ -53,4 +54,9 @@ class Channel:
         end_y = min(center[1]+radius, canvasDimensions[1])
 
         if end_x > start_x and end_y > start_y:
-            self.table[int(start_y/4): int(end_y/4), int(start_x/4): int(end_x/4)] = np.random.rand(int((end_x - start_x)/4), int((end_y - start_y)/4))
+            sx = int(start_x/zoom)
+            sy = int(start_y/zoom)
+            ex = int(end_x/zoom)
+            ey = int(end_y/zoom)
+            
+            self.table[sy: ey, sx: ex] = np.random.rand(ey-sy, ex-sx)

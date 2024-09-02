@@ -33,7 +33,7 @@ class Gui:
         self.canvasDimensions = self.zoom*self.tabLen, self.zoom*self.tabLen
         self.patternSavedFlag = 0
 
-        '''initializing mainframe and secondframe'''
+        '''initializing the four frames'''
         self.root.maxsize(self.width, self.height)
         self.mainframe = Frame(self.root, width=self.MAINFRAME_W, height=self.MAINFRAME_H)
         self.mainframe.grid(row=0, column=0, padx=0, pady=0)
@@ -82,34 +82,34 @@ class Gui:
         self.printU(U)
 
     def plotGrowthFunction(self, parametersList):
-        # Crea una figura con le dimensioni del canvas
+        '''Create subplots of the growth function'''
         width = self.canvasDimensions[0]/100
         height = self.canvasDimensions[1]/100  
         fig, ax = plt.subplots(figsize=(width, height))
 
-        # Itera attraverso la lista dei parametri
+        '''cycle through the parameters list and plot the growth function'''
         for params in parametersList:
             mean, std_dev = params
             x = np.linspace(mean - 3*std_dev, mean + 3*std_dev, 100)
             y = (np.exp(-((x-mean)/std_dev)**2 / 2)*2)-1
             ax.plot(x, y)
 
-        # Riduci la dimensione dei numeri degli assi
+        '''Design changes'''
         ax.tick_params(axis='both', which='major', labelsize=8)
 
-        # Salva il grafico come immagine in un buffer
+        '''Image saving'''
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
 
-        # Carica l'immagine utilizzando PIL
+        '''Image loading'''
         img = Image.open(buf)
         self.imgFourthFrame = ImageTk.PhotoImage(img)
 
-        # Visualizza l'immagine sul quarto canvas
+        '''Display the image'''
         self.canvasFourthFrame.create_image(0, 0, anchor="nw", image=self.imgFourthFrame)
 
-        # Chiudi il buffer
+        '''closing buffer'''
         buf.close()
         
 
@@ -140,20 +140,17 @@ class Gui:
     def printTable(self, tableList, padx=0, pady=0):
         scaledTables = []
         for i in range(len(tableList)):
+            '''fast method to scale the table'''
             table = np.kron(tableList[i], np.ones((self.zoom, self.zoom)))
             scaledTables.append(table)
 
+        '''trasform to array, transpose in new shape for cv2 normalization'''
         scaledTables = np.array(scaledTables)
         scaledTables = np.transpose(scaledTables, (1, 2, 0))
         scaledTables = cv2.normalize(scaledTables, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-        # Create rgb image
+        '''create RGB image'''
         self.imgFirstFrame = ImageTk.PhotoImage(image=Image.fromarray(scaledTables, 'RGB'))
         self.canvasFirstFrame.create_image(padx, pady, anchor="nw", image=self.imgFirstFrame)
-
-
-    def color_mapping(self, table):
-        colored_table = cv2.applyColorMap(table, cv2.COLORMAP_INFERNO)
-        return colored_table
 
     def initialize_secondwindow(self):
         self.initialize_buttons()
@@ -163,7 +160,7 @@ class Gui:
 
         self.buttonList = []
 
-        # Aggiungere colonne vuote ai lati
+        '''empty columns to center buttons'''
         self.secondframe.grid_columnconfigure(0, weight=1)
         self.secondframe.grid_columnconfigure(4, weight=1)
         
@@ -208,32 +205,25 @@ class Gui:
 
     def saveFunction(self):
         self.saveFlag = 1
-        print("Hai premuto save")
 
     def nextFunction(self):
         self.nextFlag = 1
-        print("Hai premuto next")
     
     def prevFunction(self):
         self.prevFlag = 1
-        print("Hai premuto prev")
 
     def play(self):
         self.playFlag = 1
-        print("Hai premuto play")
 
     def stop(self):
         self.playFlag = 0
-        print("Hai premuto stop")
 
     def reset(self):
         self.playFlag = 2
-        print("Hai premuto reset")
 
     def click(self, event):
         self.clickFlag = 1
         self.lastClickFlag = event.x, event.y
-        print("Hai cliccato col tasto sinistro nella posizione: ", event.x, event.y)
 
     def updateFps(self, realTimeFPS):
         self.labelFps.config(text="FPS: "+str(realTimeFPS)[:4])
